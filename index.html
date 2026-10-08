@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<meta name="theme-color" content="#0a1220">
+<title>Workout</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230a1220'/%3E%3Crect x='30' y='78' width='120' height='24' rx='6' fill='%23e8cfa0'/%3E%3Crect x='18' y='62' width='22' height='56' rx='7' fill='%23cfe0f7'/%3E%3Crect x='140' y='62' width='22' height='56' rx='7' fill='%23cfe0f7'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0a1220;
+    --field:#152744;
+    --field2:#1b3358;
+    --line:#1e3252;
+    --ink:#ffffff;
+    --blue:#89b4ee;
+    --blue2:#6f9fe0;
+    --dim:#5d7ba6;
+    --amber:#f0c987;
+    --amber2:#e8cfa0;
+    --green:#7fc79b;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:var(--bg)}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+    -webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;
+    padding:0 0 60px;
+  }
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  .wrap{max-width:620px;margin:0 auto;padding:0 18px}
+
+  header{padding:calc(10px + env(safe-area-inset-top)) 0 0}
+  .hrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:10px}
+  .hrow h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em}
+  .hrow .cnt{color:var(--amber);font-size:13px;white-space:nowrap}
+  .tabs{display:flex;gap:20px;border-bottom:1px solid var(--line);padding-bottom:0}
+  .tabs button{
+    background:none;border:none;color:var(--blue);font:inherit;font-size:17px;font-weight:600;
+    padding:8px 0 9px;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;
+  }
+  .tabs button.on{color:#fff;border-bottom-color:var(--amber)}
+
+  .days{display:flex;gap:8px;overflow-x:auto;padding:10px 18px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .days::-webkit-scrollbar{display:none}
+  .day{
+    flex:0 0 auto;min-width:76px;background:var(--field);border:1px solid var(--line);
+    border-radius:9px;padding:9px 10px 10px;text-align:center;cursor:pointer;
+  }
+  .day b{display:block;font-size:16px;font-weight:700;color:var(--blue);letter-spacing:-.01em}
+  .day span{display:block;font-size:11px;line-height:1.25;color:var(--dim);margin-top:2px}
+  .day.on{background:var(--amber2);border-color:var(--amber2)}
+  .day.on b,.day.on span{color:#1a2434}
+  .day.on span{color:#3d4a5c}
+  .day.today:not(.on){border-color:rgba(240,201,135,.6)}
+  .day.has b::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:5px;vertical-align:2px}
+  .day.on.has b::after{background:#2f6b47}
+
+  .wknav{display:flex;align-items:center;gap:8px;max-width:620px;margin:0 auto;padding:12px 18px 0}
+  .wkbtn{
+    width:36px;height:32px;flex:0 0 auto;background:var(--field);border:1px solid var(--line);border-radius:8px;
+    color:var(--blue);font:inherit;font-size:21px;line-height:1;padding:0 0 3px;cursor:pointer;
+  }
+  .wkbtn:disabled{opacity:.35;cursor:default}
+  .wklbl{min-width:96px;text-align:center;font-size:14px;font-weight:600;color:var(--blue);font-variant-numeric:tabular-nums}
+  .wktoday{
+    margin-left:auto;background:none;border:1px solid rgba(240,201,135,.5);color:var(--amber);
+    border-radius:999px;padding:5px 13px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;
+  }
+  .wktoday[hidden]{display:none}
+
+  section{display:none}
+  section.on{display:block}
+
+  .ex{border-bottom:1px solid var(--line);padding:16px 0 18px}
+  .ex:first-child{padding-top:16px}
+  .exhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .exhead h2{margin:0;font-size:21px;font-weight:700;letter-spacing:-.02em}
+  .exhead .presc{font-size:13px;color:var(--blue);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .lastline{font-size:13.5px;color:var(--blue);margin:5px 0 0}
+  .lastline b{color:#fff;font-weight:700}
+  .uselast{
+    background:none;border:none;color:var(--amber);font:inherit;font-size:13.5px;
+    text-decoration:underline;text-underline-offset:3px;padding:2px 4px;margin-left:5px;cursor:pointer;
+  }
+  .setrow{display:grid;grid-template-columns:16px 1fr 14px 1fr;gap:8px;align-items:center;margin-top:9px}
+  .setno{color:var(--blue);font-size:13px;font-variant-numeric:tabular-nums}
+  .times{color:var(--blue);font-size:13px;text-align:center}
+  .setrow input{
+    width:100%;min-width:0;background:var(--field);border:1px solid var(--line);color:var(--blue);
+    border-radius:7px;padding:12px 6px;font-size:18px;font-weight:600;font-family:inherit;
+    text-align:center;font-variant-numeric:tabular-nums;
+  }
+  .setrow input::placeholder{color:#39537d;font-weight:400}
+  .setrow input:not(:placeholder-shown){color:#fff;font-weight:700;border-color:#2b4a78}
+  .setrow input:focus{outline:none;border-color:var(--blue2);background:var(--field2);color:#fff}
+  .note{
+    margin:12px 0 0;padding-left:11px;border-left:3px solid var(--amber);
+    font-size:14.5px;font-weight:600;color:#fff;
+  }
+  .recipe{margin:8px 0 0;font-size:14.5px;line-height:1.45;color:#dbe7f7}
+  .cxheads{display:grid;grid-template-columns:16px 1fr 14px 1fr;gap:8px;margin-top:13px;font-size:12px;color:var(--dim);text-align:center}
+  .cxheads + .setrow{margin-top:4px}
+  .sechead{margin:20px 0 0;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+
+  .block{padding:18px 0 4px}
+  .block h2{margin:0;font-size:19px;font-weight:700;letter-spacing:-.02em}
+  .block p.sub{margin:4px 0 0;font-size:14px;color:var(--blue)}
+
+  .wt{display:flex;gap:9px;margin-top:13px;align-items:stretch}
+  .wt input{
+    flex:1 1 0;min-width:0;background:var(--field);border:1px solid var(--line);color:var(--blue);
+    border-radius:8px;padding:14px 10px;font-size:21px;font-weight:700;font-family:inherit;
+    text-align:center;font-variant-numeric:tabular-nums;
+  }
+  .wt input::placeholder{color:#39537d;font-weight:400;font-size:16px}
+  .wt input:not(:placeholder-shown){color:#fff}
+  .wt input:focus{outline:none;border-color:var(--blue2);color:#fff}
+  .wt button{
+    flex:0 0 auto;min-width:104px;background:var(--field2);border:1px solid var(--line);color:#fff;
+    border-radius:8px;padding:0 16px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;
+  }
+  .wt button.saved{background:rgba(127,199,155,.14);border-color:rgba(127,199,155,.5);color:var(--green)}
+
+  .wtile{
+    display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;text-align:left;
+    background:var(--field);border:1px solid var(--line);border-radius:9px;padding:11px 12px 11px 14px;
+    color:var(--ink);font:inherit;cursor:pointer;
+  }
+  .wtile .wtxt{flex:1 1 auto;min-width:0}
+  .wtile .wtxt b{display:block;font-size:15px;font-weight:700}
+  .wtile .wtxt span{display:block;font-size:13px;color:var(--blue);margin-top:1px;font-variant-numeric:tabular-nums}
+  .wtile .wtxt .wd.down{color:var(--green)}
+  .wtile .wtxt .wd.up{color:#e69a86}
+  .wtile svg.spark{flex:0 0 84px;width:84px;height:30px;margin:0}
+  .wtile .chev{flex:0 0 auto;color:var(--amber);font-size:24px;line-height:1;margin-top:-2px}
+
+  .chunkhead{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px}
+  .chunkhead span:first-child{font-size:15px;font-weight:600}
+  .chunkhead span:last-child{font-size:14px;color:var(--blue);font-variant-numeric:tabular-nums}
+  .chunks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+  .chunk{
+    background:var(--field);border:1px solid var(--line);border-radius:8px;
+    padding:15px 4px;text-align:center;font-size:15px;font-weight:600;color:var(--blue);cursor:pointer;
+  }
+  .chunk.on{background:rgba(127,199,155,.16);border-color:rgba(127,199,155,.5);color:var(--green)}
+
+  /* tap-to-tick daily items */
+  .ticks{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+  .tick{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--field);border:1px solid var(--line);border-radius:9px;
+    padding:14px;font-size:15px;font-weight:600;color:var(--blue);cursor:pointer;
+    -webkit-user-select:none;user-select:none;
+  }
+  .tick.wide{grid-column:1 / -1}
+  .tick small{font-size:12px;font-weight:400;color:var(--dim);margin-left:7px}
+  .tick .box{flex:0 0 auto;width:22px;height:22px;border-radius:6px;border:1.5px solid #3b5680;position:relative}
+  .tick.on{background:rgba(127,199,155,.16);border-color:rgba(127,199,155,.5);color:var(--green)}
+  .tick.on small{color:rgba(127,199,155,.75)}
+  .tick.on .box{background:var(--green);border-color:var(--green)}
+  .tick.on .box::after{
+    content:"";position:absolute;left:7.5px;top:3.5px;width:5px;height:11px;
+    border:solid #0b2416;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);
+  }
+
+  .restday{padding:20px 0 4px;color:var(--blue);font-size:15px}
+  .restday + .restday{padding-top:6px}
+
+  /* history */
+  .hcard{border-bottom:1px solid var(--line);padding:16px 0 18px}
+  .hcard h2{margin:0;font-size:19px;font-weight:700;letter-spacing:-.02em}
+  .hrow2{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .hrow2 .meta{font-size:13px;color:var(--blue);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .hsub{margin:5px 0 0;font-size:13.5px;color:var(--blue)}
+  svg{display:block;width:100%;height:auto;overflow:visible;margin-top:12px}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px}
+  .stat{background:var(--field);border:1px solid var(--line);border-radius:9px;padding:11px 12px 12px}
+  .stat .k{font-size:12.5px;color:var(--blue);margin-bottom:3px}
+  .stat .v{font-size:24px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .v.gain{color:var(--green)} .v.loss{color:#e69a86} .v.none{color:var(--dim);font-size:19px}
+  .striplbl{display:flex;justify-content:space-between;align-items:baseline;margin-top:15px;font-size:14.5px;font-weight:600}
+  .striplbl em{font-style:normal;font-weight:400;color:var(--blue);font-variant-numeric:tabular-nums}
+  .strip{display:grid;grid-template-columns:repeat(21,1fr);gap:3px;margin-top:6px}
+  .strip i{height:19px;border-radius:3px;background:var(--field);display:block}
+  .strip i.y{background:var(--green);opacity:.85}
+  .strip i.p{background:var(--green);opacity:.4}
+  .empty{color:var(--dim);font-size:14.5px;margin:10px 0 0}
+
+  /* weight tab */
+  .wpanel{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:12px 12px 13px;margin-top:14px}
+  .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--bg);border-radius:9px;padding:2px}
+  .seg button{
+    background:none;border:none;border-radius:7px;color:var(--blue);font:inherit;font-size:14px;font-weight:600;
+    padding:7px 0;cursor:pointer;
+  }
+  .seg button.on{background:var(--field2);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+  .whead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:16px 4px 0}
+  .wlbl{font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+  .wbig{font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums;margin-top:2px}
+  .wbig small{font-size:16px;font-weight:600;color:var(--blue);letter-spacing:0}
+  .wsub{font-size:13.5px;color:var(--blue);margin-top:3px;min-height:19px}
+  .wright{text-align:right;padding-bottom:22px}
+  .wchg{font-size:19px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:2px}
+  .wchg.down{color:var(--green)} .wchg.up{color:#e69a86} .wchg.flat{color:var(--blue)}
+  .wchart{touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:crosshair;border-radius:8px}
+  .wchart svg{margin-top:8px}
+  .wchart .empty{padding:40px 0;text-align:center}
+  .wleg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin:8px 4px 0;font-size:12.5px;color:var(--dim)}
+  .wleg span{display:inline-flex;align-items:center;gap:6px}
+  .wleg .ld{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue)}
+  .wleg .ll{display:inline-block;width:16px;height:2px;border-radius:2px;background:var(--amber)}
+  .ritem{
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;
+    background:none;border:none;border-bottom:1px solid var(--line);color:var(--ink);
+    font:inherit;padding:12px 0;cursor:pointer;text-align:left;font-variant-numeric:tabular-nums;
+  }
+  .ritem span{font-size:14.5px;color:var(--blue)}
+  .ritem b{font-size:16px;font-weight:700}
+  .ritem b i{font-style:normal;font-weight:400;color:var(--dim);margin-left:8px}
+
+  /* backup */
+  .bcard{border-bottom:1px solid var(--line);padding:16px 0 20px}
+  .bcard h2{margin:0;font-size:19px;font-weight:700;letter-spacing:-.02em}
+  .bcard p{margin:5px 0 0;font-size:14px;color:var(--blue)}
+  .btn{
+    width:100%;margin-top:11px;background:var(--field2);border:1px solid var(--line);color:#fff;
+    border-radius:9px;padding:15px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;
+  }
+  .btn.amber{background:var(--amber2);border-color:var(--amber2);color:#1a2434;font-weight:700}
+  textarea{
+    width:100%;min-height:120px;margin-top:11px;background:var(--field);border:1px solid var(--line);
+    color:var(--blue);border-radius:9px;padding:11px;
+    font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  textarea:focus{outline:none;border-color:var(--blue2)}
+  .warn{
+    margin-top:14px;padding:12px 14px;border-radius:9px;font-size:14px;line-height:1.4;
+    border:1px solid rgba(240,201,135,.35);background:rgba(240,201,135,.1);color:var(--amber);
+  }
+  .warn.hide{display:none}
+  .warn.bad{border-color:rgba(230,154,134,.45);background:rgba(230,154,134,.12);color:#f0ad99}
+  :focus-visible{outline:2px solid var(--blue2);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="hrow">
+      <h1 id="today"></h1>
+      <span class="cnt" id="sessCount"></span>
+    </div>
+    <div class="tabs">
+      <button data-tab="log" class="on">Log</button>
+      <button data-tab="weight">Weight</button>
+      <button data-tab="history">History</button>
+      <button data-tab="backup">Backup</button>
+    </div>
+  </header>
+</div>
+
+<div id="dayNav">
+  <div class="wknav">
+    <button type="button" class="wkbtn" id="wkPrev" aria-label="Previous week">&#8249;</button>
+    <span class="wklbl" id="wkLbl"></span>
+    <button type="button" class="wkbtn" id="wkNext" aria-label="Next week">&#8250;</button>
+    <button type="button" class="wktoday" id="wkToday" hidden>Today</button>
+  </div>
+  <div class="days" id="days"></div>
+</div>
+
+<div class="wrap">
+  <section id="tab-log" class="on">
+    <div id="warnTop"></div>
+    <div id="lifts"></div>
+    <div id="dailyBlock"></div>
+  </section>
+
+  <section id="tab-weight">
+    <div class="block">
+      <h2>Weight</h2>
+      <p class="sub">Pick a range. Tap or drag on the chart to read any point.</p>
+    </div>
+    <div class="wpanel">
+      <div class="seg" id="wRange">
+        <button type="button" data-r="W" aria-label="Week">W</button>
+        <button type="button" data-r="M" aria-label="Month">M</button>
+        <button type="button" data-r="6M" aria-label="6 months">6M</button>
+        <button type="button" data-r="Y" aria-label="Year">Y</button>
+      </div>
+      <div class="whead">
+        <div>
+          <div class="wlbl" id="wcLbl">Average</div>
+          <div class="wbig"><span id="wcVal">--</span> <small>lb</small></div>
+          <div class="wsub" id="wcSub"></div>
+        </div>
+        <div class="wright" id="wcChg"></div>
+      </div>
+      <div class="wchart" id="wChartBox" tabindex="0" role="group" aria-label="Weight chart. Left and right arrow keys step through the points."></div>
+      <div class="wleg" id="wcLeg"></div>
+    </div>
+    <div id="wStats"></div>
+    <div class="block"><h2>Recent readings</h2><p class="sub">Tap one to open that day.</p></div>
+    <div id="wList"></div>
+  </section>
+
+  <section id="tab-history">
+    <div id="histHabits"></div>
+    <div id="histLifts"></div>
+  </section>
+
+  <section id="tab-backup">
+    <div class="bcard">
+      <h2>Back up your log</h2>
+      <p>Everything is stored on this phone only. Nothing syncs. Export once a week.</p>
+      <button class="btn amber" id="bCopy">Copy backup as text</button>
+      <button class="btn" id="bDown">Download backup file</button>
+      <p id="bWhen" style="margin-top:12px"></p>
+    </div>
+    <div class="bcard">
+      <h2>Restore</h2>
+      <p>Paste a backup below. This replaces everything currently logged.</p>
+      <textarea id="bBox" placeholder="Paste backup text here"></textarea>
+      <button class="btn" id="bRestore">Restore from text</button>
+    </div>
+    <div class="bcard" style="border-bottom:none">
+      <h2>Plain summary</h2>
+      <p>A readable recap you can paste anywhere.</p>
+      <button class="btn" id="bSum">Build summary</button>
+      <textarea id="bSumBox" placeholder="Summary appears here" readonly></textarea>
+    </div>
+  </section>
+</div>
+
+<script>
+"use strict";
+
+/* ================= program ================= */
+var PROGRAM = {
+  1:{label:"Mon", part:"Push / pull", lifts:[
+    {id:"chest-press",     n:"Chest press",     sets:4, lo:8,  hi:12},
+    {id:"seated-row",      n:"Seated row",      sets:4, lo:8,  hi:12},
+    {id:"dumbbell-curl",   n:"Dumbbell curl",   sets:3, lo:10, hi:15, ss:true},
+    {id:"tricep-pressdown",n:"Tricep pressdown",sets:3, lo:10, hi:15, ss:true}
+  ]},
+  /* Tuesday's old leg lifts share ids with Friday's, so their history carries on there */
+  2:{label:"Tue", part:"KB complex", lifts:[
+    {id:"kb-complex", n:"KB complex", type:"complex", rounds:8,
+     recipe:"Per round: 8 swings · 8 goblet squats · 8 twists · 4 around the world each direction. One bell, never set down. Rest 45–60 s between rounds."}
+  ]},
+  3:{label:"Wed", part:"Shoulders / back", lifts:[
+    {id:"shoulder-press",  n:"Shoulder press",  sets:4, lo:8,  hi:12},
+    {id:"lat-pulldown",    n:"Lat pulldown",    sets:4, lo:8,  hi:12},
+    {id:"dumbbell-curl",   n:"Dumbbell curl",   sets:3, lo:10, hi:15, ss:true},
+    {id:"tricep-pressdown",n:"Tricep pressdown",sets:3, lo:10, hi:15, ss:true}
+  ]},
+  4:{label:"Thu", part:"Chest / back", lifts:[
+    {id:"pec-deck",        n:"Pec deck",         sets:4, lo:10, hi:15},
+    {id:"reverse-pec-deck",n:"Reverse pec deck", sets:4, lo:12, hi:18},
+    {id:"lateral-raise",   n:"Lateral raise",    sets:3, lo:12, hi:18}
+  ]},
+  5:{label:"Fri", part:"Legs", lifts:[
+    {id:"leg-press",  n:"Leg press",  sets:4, lo:12, hi:18, note:"Lighter, slower, higher reps."},
+    {id:"leg-curl",   n:"Leg curl",   sets:4, lo:12, hi:18},
+    {id:"calf-raise", n:"Calf raise", sets:3, lo:10, hi:15}
+  ]},
+  6:{label:"Sat", part:"Yoga / abs", lifts:[]},
+  7:{label:"Sun", part:"Yoga / abs", lifts:[]}
+};
+
+var SQUAT_CHUNK = 25, SQUAT_CHUNKS = 4;
+function hasSquats(di){ return di >= 1 && di <= 5; }
+
+/* Tap-to-tick items under "Every day". days: 1 = Mon ... 7 = Sun.
+   Abs and yoga used to be minutes; any old entry above zero shows as ticked. */
+var EVERY = [1,2,3,4,5,6,7];
+var TICKS = [
+  {id:"supps-am", n:"Morning supplements", days:EVERY, wide:true},
+  {id:"pushups",  n:"Push-ups",            days:[1,3,5]},
+  {id:"planks",   n:"Planks",              days:[1,3,5]},
+  {id:"abs",      n:"Abs",  sub:"5 min",   days:[6,7]},
+  {id:"yoga",     n:"Yoga", sub:"10 min",  days:[6,7]},
+  {id:"walk",     n:"Walk",                days:EVERY},
+  {id:"supps-pm", n:"Bedtime supplements", days:EVERY, wide:true}
+];
+function ticksFor(di){ return TICKS.filter(function(t){ return t.days.indexOf(di) >= 0; }); }
+
+/* ================= storage ================= */
+var KEY = "amy.workout.v2";
+var DB = {sessions:{}, daily:{}, weights:{}, lastBackup:null};
+var SEL = null, VIEWDAY = null;
+
+function blank(){ return {sessions:{}, daily:{}, weights:{}, lastBackup:null}; }
+
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(raw){ DB = merge(blank(), JSON.parse(raw)); return; }
+  }catch(e){}
+  adopt();
+}
+
+/* Pull in whatever the previous version of this app stored, whatever it called itself. */
+function adopt(){
+  var found = null;
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k = localStorage.key(i);
+      if(k === KEY) continue;
+      var v;
+      try{ v = JSON.parse(localStorage.getItem(k)); }catch(e){ continue; }
+      if(v && typeof v === "object" && (v.sessions || v.days || v.log)){ found = v; break; }
+    }
+  }catch(e){}
+  if(!found) return;
+  DB = blank();
+  var src = found.sessions || found.days || found.log || {};
+  for(var d in src){
+    var s = src[d];
+    var lifts = s && (s.lifts || s.exercises || s);
+    if(!lifts || typeof lifts !== "object") continue;
+    var out = {};
+    for(var id in lifts){
+      var arr = lifts[id];
+      if(!Array.isArray(arr)) continue;
+      out[normId(id)] = arr.map(function(x){
+        if(!x) return null;
+        var w = x.w != null ? x.w : (x.weight != null ? x.weight : null);
+        var r = x.r != null ? x.r : (x.reps != null ? x.reps : null);
+        return (w==null && r==null) ? null : {w:num(w), r:num(r)};
+      });
+    }
+    if(Object.keys(out).length) DB.sessions[d] = {lifts: out};
+  }
+  if(found.weights) for(var wd in found.weights){ var wv = num(found.weights[wd]); if(wv!=null) DB.weights[wd] = wv; }
+  var od = found.daily || found.dailies || {};
+  for(var dd in od){
+    var o = od[dd] || {}, t = {};
+    if(o.planks) t.planks = true;
+    if(o.walk)   t.walk   = true;
+    if(o.pushups > 0 || o.pushUps > 0 || o.pushups === true) t.pushups = true;
+    var sq = num(o.squats);
+    if(sq != null && sq > 0) t.squats = Math.min(SQUAT_CHUNKS, Math.round(sq / SQUAT_CHUNK));
+    if(Object.keys(t).length) DB.daily[dd] = t;
+  }
+  if(found.lastBackup) DB.lastBackup = found.lastBackup;
+  save();
+}
+function normId(s){
+  return String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")
+    .replace(/^row-or-pulldown$/,"reverse-pec-deck")
+    .replace(/^db-curl$/,"dumbbell-curl")
+    .replace(/^pressdown$/,"tricep-pressdown")
+    .replace(/^tricep-pushdown$/,"tricep-pressdown");
+}
+function num(v){ if(v===""||v==null) return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
+function merge(base, p){
+  if(!p || typeof p !== "object") return base;
+  base.sessions = p.sessions || {};
+  base.daily    = p.daily    || {};
+  base.weights  = p.weights  || {};
+  base.lastBackup = p.lastBackup || null;
+  return base;
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch(e){ alert("Could not save — the phone may be out of storage."); }
+}
+
+/* ================= dates ================= */
+function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function parse(s){ var a = s.split("-"); return new Date(+a[0], +a[1]-1, +a[2]); }
+function shift(s,n){ var d = parse(s); d.setDate(d.getDate()+n); return iso(d); }
+function dayIndex(s){ var w = parse(s).getDay(); return w === 0 ? 7 : w; }
+function longDate(s){ return parse(s).toLocaleDateString(undefined,{weekday:"long", month:"short", day:"numeric"}); }
+function medDate(s){ return parse(s).toLocaleDateString(undefined,{weekday:"long", month:"short", day:"numeric"}); }
+function shortDate(s){ return parse(s).toLocaleDateString(undefined,{weekday:"short", month:"short", day:"numeric"}); }
+function mondayOf(s){ return shift(s, 1 - dayIndex(s)); }
+function fmtMD(d){ return d.toLocaleDateString(undefined,{month:"short", day:"numeric"}); }
+function rangeText(a, b, withYear){
+  var A = parse(a), B = parse(b);
+  if(A.getFullYear() !== B.getFullYear()) return fmtMD(A)+", "+A.getFullYear()+" – "+fmtMD(B)+", "+B.getFullYear();
+  var y = withYear ? ", "+B.getFullYear() : "";
+  if(A.getMonth() === B.getMonth()) return fmtMD(A)+" – "+B.getDate()+y;
+  return fmtMD(A)+" – "+fmtMD(B)+y;
+}
+function monthRange(a, b){
+  var A = parse(a), B = parse(b), o = {month:"short"};
+  return A.getFullYear() === B.getFullYear()
+    ? A.toLocaleDateString(undefined,o)+" – "+B.toLocaleDateString(undefined,o)+" "+B.getFullYear()
+    : A.toLocaleDateString(undefined,o)+" "+A.getFullYear()+" – "+B.toLocaleDateString(undefined,o)+" "+B.getFullYear();
+}
+
+
+/* ================= lookups ================= */
+function setsOf(date, id){
+  var s = DB.sessions[date];
+  return (s && s.lifts && s.lifts[id]) ? s.lifts[id] : null;
+}
+function filled(a){ return (a||[]).filter(function(x){ return x && x.w != null && x.r != null; }); }
+function prevOf(date, id){
+  var ds = Object.keys(DB.sessions).filter(function(d){ return d < date && filled(setsOf(d,id)).length; }).sort();
+  if(!ds.length) return null;
+  var d = ds[ds.length-1];
+  return {date:d, sets:filled(setsOf(d,id))};
+}
+function e1rm(w,r){ return w * (1 + r/30); }
+function bestE1(a){ return Math.max.apply(null, a.map(function(s){ return e1rm(s.w, s.r); })); }
+function sessionCount(){ return Object.keys(DB.sessions).filter(function(d){
+  var L = DB.sessions[d].lifts || {}; for(var k in L){ if(filled(L[k]).length) return true; } return false;
+}).length; }
+function allLifts(){
+  var m = [];
+  var seen = {};
+  for(var d=1; d<=7; d++){
+    (PROGRAM[d].lifts||[]).forEach(function(b){
+      if(!seen[b.id]){ seen[b.id]=1; m.push({id:b.id, n:b.n}); }
+    });
+  }
+  return m;
+}
+function defOf(id){
+  for(var d=1; d<=7; d++){
+    var L = PROGRAM[d].lifts || [];
+    for(var i=0;i<L.length;i++) if(L[i].id === id) return L[i];
+  }
+  return null;
+}
+function complexId(id){ var b = defOf(id); return !!(b && b.type === "complex"); }
+function touched(a){ return (a||[]).some(function(x){ return x && (x.w != null || x.r != null); }); }
+function liftIdsOn(date){
+  var s = DB.sessions[date], out = [];
+  if(s && s.lifts) for(var k in s.lifts) if(touched(s.lifts[k])) out.push(k);
+  return out;
+}
+/* anything at all saved on this date: sets, weight, squats or a tick */
+function hasDay(date){
+  if(liftIdsOn(date).length || DB.weights[date] != null) return true;
+  var o = DB.daily[date] || {};
+  for(var k in o) if(o[k]) return true;
+  return false;
+}
+
+/* ================= render: week strip ================= */
+/* Each tile is a real date. Picking one shows what was saved that day, and anything entered saves to it. */
+var WEEK0 = null;   /* Monday of the week on screen */
+function renderDays(){
+  var host = document.getElementById("days");
+  host.innerHTML = "";
+  var today = iso(new Date());
+  for(var i=0;i<7;i++){
+    (function(date){
+      var di = dayIndex(date);
+      var el = document.createElement("div");
+      el.className = "day" + (date === SEL ? " on" : "") + (date === today ? " today" : "") + (hasDay(date) ? " has" : "");
+      el.setAttribute("role","button");
+      el.setAttribute("tabindex","0");
+      el.setAttribute("data-date", date);
+      el.setAttribute("aria-label", longDate(date) + ", " + PROGRAM[di].part);
+      el.innerHTML = "<b>"+PROGRAM[di].label+" "+parse(date).getDate()+"</b><span>"+PROGRAM[di].part+"</span>";
+      function go(){ pick(date); }
+      el.addEventListener("click", go);
+      el.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } });
+      host.appendChild(el);
+    })(shift(WEEK0, i));
+  }
+  var thisMon = mondayOf(today);
+  document.getElementById("wkLbl").textContent =
+    WEEK0 === thisMon ? "This week" :
+    WEEK0 === shift(thisMon,-7) ? "Last week" :
+    rangeText(WEEK0, shift(WEEK0,6), parse(WEEK0).getFullYear() !== parse(today).getFullYear());
+  document.getElementById("wkNext").disabled = WEEK0 >= thisMon;
+  document.getElementById("wkToday").hidden = (SEL === today);
+  var on = host.querySelector(".day.on");
+  if(on && on.scrollIntoView) on.scrollIntoView({block:"nearest", inline:"center"});
+}
+/* green dot on days that have something saved */
+function refreshDots(){
+  document.querySelectorAll("#days .day").forEach(function(el){
+    el.classList.toggle("has", hasDay(el.getAttribute("data-date")));
+  });
+}
+function pick(date){
+  SEL = date; VIEWDAY = dayIndex(date); WEEK0 = mondayOf(date);
+  renderDays(); renderLog();
+}
+
+/* ================= render: log ================= */
+function renderLog(){
+  var today = iso(new Date());
+  document.getElementById("today").textContent = longDate(SEL);
+  var c = sessionCount();
+  document.getElementById("sessCount").textContent = c + (c === 1 ? " session logged" : " sessions logged");
+
+  renderWarn();
+
+  var host = document.getElementById("lifts");
+  host.innerHTML = "";
+  var list = PROGRAM[dayIndex(SEL)].lifts || [];
+
+  /* lifts saved on this date that aren't in its routine (older entries, or the program changed since) */
+  var mine = {};
+  list.forEach(function(b){ mine[b.id] = 1; });
+  var extras = liftIdsOn(SEL).filter(function(id){ return !mine[id]; });
+  var used = list.some(function(b){ return touched(setsOf(SEL, b.id)); });
+  var showRoutine = SEL >= today || used || !extras.length;
+
+  if(SEL !== today){
+    host.insertAdjacentHTML("beforeend", '<p class="restday">'+(SEL < today ? "Looking back." : "Looking ahead.")+
+      ' Anything you enter saves to this day.</p>');
+  }
+  if(showRoutine){
+    if(!list.length) host.insertAdjacentHTML("beforeend", '<p class="restday">No lifting on this day. Abs and yoga are below.</p>');
+    list.forEach(function(b){ host.appendChild(b.type === "complex" ? complexEx(b) : liftEx(b)); });
+  }
+  if(extras.length){
+    host.insertAdjacentHTML("beforeend", '<p class="sechead">'+(showRoutine && list.length ? "Also logged this day" : "Logged this day")+'</p>');
+    extras.forEach(function(id){
+      var d = defOf(id) || {n:id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g," ")};
+      var b = {id:id, n:d.n, sets:Math.max(d.sets || 0, (setsOf(SEL,id) || []).length),
+               type:d.type, rounds:d.rounds, recipe:d.recipe};
+      host.appendChild(b.type === "complex" ? complexEx(b) : liftEx(b));
+    });
+  }
+
+  renderDaily();
+}
+
+function liftEx(b){
+  var ex = document.createElement("div");
+  ex.className = "ex";
+  var prev = prevOf(SEL, b.id);
+
+  var head = '<div class="exhead"><h2>'+b.n+'</h2><span class="presc">'+
+    (b.lo != null ? b.sets+' \u00d7 '+b.lo+'\u2013'+b.hi : b.sets+' sets')+(b.ss ? ' \u00b7 superset' : '')+'</span></div>';
+
+  var lastHtml = '<p class="lastline">' + (prev
+    ? 'Last on '+medDate(prev.date)+': <b>'+prev.sets[0].w+' \u00d7 '+prev.sets[0].r+'</b>'+
+      '<button class="uselast" type="button">use last</button>'
+    : 'No previous session logged.') + '</p>';
+
+  ex.innerHTML = head + lastHtml + '<div class="rows"></div>' +
+    (b.note ? '<p class="note">'+b.note+'</p>' : '');
+
+  var rows = ex.querySelector(".rows");
+  var cur = setsOf(SEL, b.id) || [];
+  var inputs = [];
+  for(var i=0;i<b.sets;i++){
+    (function(idx){
+      var g = prev && prev.sets[idx] ? prev.sets[idx] : (prev ? prev.sets[prev.sets.length-1] : null);
+      var c2 = cur[idx] || {};
+      var row = document.createElement("div");
+      row.className = "setrow";
+      row.innerHTML =
+        '<div class="setno">'+(idx+1)+'</div>'+
+        '<input type="number" inputmode="decimal" step="0.5" placeholder="'+(g ? g.w : "\u2014")+'" value="'+(c2.w != null ? c2.w : "")+'">'+
+        '<div class="times">\u00d7</div>'+
+        '<input type="number" inputmode="numeric" step="1" placeholder="'+(g ? g.r : "\u2014")+'" value="'+(c2.r != null ? c2.r : "")+'">';
+      var ii = row.querySelectorAll("input");
+      inputs.push(ii);
+      function commit(){ putSet(b.id, idx, ii[0].value, ii[1].value); }
+      ii[0].addEventListener("change", commit);
+      ii[1].addEventListener("change", commit);
+      rows.appendChild(row);
+    })(i);
+  }
+
+  var ul = ex.querySelector(".uselast");
+  if(ul) ul.addEventListener("click", function(){
+    for(var i=0;i<inputs.length;i++){
+      var g = prev.sets[i] || prev.sets[prev.sets.length-1];
+      inputs[i][0].value = g.w;
+      inputs[i][1].value = g.r;
+      putSet(b.id, i, g.w, g.r);
+    }
+  });
+
+  return ex;
+}
+
+/* the KB complex: one bell, logged as bell weight x rounds finished */
+function complexEx(b){
+  var ex = document.createElement("div");
+  ex.className = "ex";
+  var prev = prevOf(SEL, b.id);
+  var p0 = prev ? prev.sets[0] : null;
+  var c = (setsOf(SEL, b.id) || [])[0] || {};
+
+  ex.innerHTML =
+    '<div class="exhead"><h2>'+b.n+'</h2><span class="presc">'+b.rounds+' rounds</span></div>'+
+    (b.recipe ? '<p class="recipe">'+b.recipe+'</p>' : '')+
+    '<p class="lastline">'+(p0
+      ? 'Last on '+medDate(prev.date)+': <b>'+p0.w+' lb \u00d7 '+p0.r+' rounds</b>'+
+        '<button class="uselast" type="button">use last</button>'
+      : 'No previous session logged.')+'</p>'+
+    '<div class="cxheads"><span></span><span>Bell (lb)</span><span></span><span>Rounds</span></div>'+
+    '<div class="setrow"><div class="setno"></div>'+
+      '<input type="number" inputmode="decimal" step="0.5" aria-label="Bell weight in pounds" placeholder="'+(p0 ? p0.w : "lb")+'" value="'+(c.w != null ? c.w : "")+'">'+
+      '<div class="times">\u00d7</div>'+
+      '<input type="number" inputmode="numeric" step="1" aria-label="Rounds finished" placeholder="'+(p0 ? p0.r : b.rounds)+'" value="'+(c.r != null ? c.r : "")+'">'+
+    '</div>'+
+    (p0 && p0.r >= b.rounds ? '<p class="note">All '+b.rounds+' rounds last time. Try the next bell up.</p>' : '');
+
+  var ii = ex.querySelectorAll("input");
+  function commit(){ putSet(b.id, 0, ii[0].value, ii[1].value); }
+  ii[0].addEventListener("change", commit);
+  ii[1].addEventListener("change", commit);
+  var ul = ex.querySelector(".uselast");
+  if(ul) ul.addEventListener("click", function(){ ii[0].value = p0.w; ii[1].value = p0.r; commit(); });
+  return ex;
+}
+
+function putSet(id, i, w, r){
+  var s = DB.sessions[SEL] || (DB.sessions[SEL] = {lifts:{}});
+  if(!s.lifts) s.lifts = {};
+  var a = s.lifts[id] || (s.lifts[id] = []);
+  var wv = num(w), rv = num(r);
+  a[i] = (wv == null && rv == null) ? null : {w:wv, r:rv};
+  save();
+  var c = sessionCount();
+  document.getElementById("sessCount").textContent = c + (c === 1 ? " session logged" : " sessions logged");
+  refreshDots();
+}
+
+function renderDaily(){
+  var host = document.getElementById("dailyBlock");
+  var di = dayIndex(SEL);
+  var d = DB.daily[SEL] || {};
+  var isToday = SEL === iso(new Date());
+
+  var h = '<div class="block"><h2>Every day</h2><p class="sub">'+(isToday ? "Saved to today." : "Saved to "+shortDate(SEL)+".")+'</p>';
+
+  h += '<div class="wt">'+
+       '<input type="number" inputmode="decimal" step="0.1" id="wIn" placeholder="Weight (lbs)" aria-label="Weight in pounds" value="'+
+       (DB.weights[SEL] != null ? DB.weights[SEL] : "")+'">'+
+       '<button type="button" id="wSave">Save</button></div>'+
+       '<button type="button" class="wtile" id="wTile"></button>';
+
+  if(hasSquats(di)){
+    var n = d.squats || 0;
+    h += '<div class="chunkhead"><span>Squats</span><span>'+(n*SQUAT_CHUNK)+' of '+(SQUAT_CHUNK*SQUAT_CHUNKS)+'</span></div><div class="chunks">';
+    for(var i=0;i<SQUAT_CHUNKS;i++) h += '<div class="chunk'+(i < n ? ' on' : '')+'" data-sq="'+i+'" role="button" tabindex="0">'+SQUAT_CHUNK+'</div>';
+    h += '</div>';
+  }
+
+  /* checkboxes; an odd one out goes full width so the grid stays even */
+  var list = ticksFor(di);
+  var halves = list.filter(function(t){ return !t.wide; });
+  var stretch = halves.length % 2 ? halves[halves.length-1].id : null;
+  h += '<div class="ticks">';
+  list.forEach(function(t){
+    var on = !!d[t.id];
+    h += '<div class="tick'+((t.wide || t.id === stretch) ? ' wide' : '')+(on ? ' on' : '')+'" data-tick="'+t.id+
+         '" role="checkbox" aria-checked="'+on+'" tabindex="0"><span>'+t.n+(t.sub ? '<small>'+t.sub+'</small>' : '')+
+         '</span><i class="box" aria-hidden="true"></i></div>';
+  });
+  h += '</div>';
+
+  h += '</div>';
+  host.innerHTML = h;
+
+  /* weight: saves when she leaves the box or taps Save, and the button shows it stuck */
+  var wIn = document.getElementById("wIn"), wBtn = document.getElementById("wSave");
+  function wState(){
+    var ok = DB.weights[SEL] != null && num(wIn.value) === DB.weights[SEL];
+    wBtn.textContent = ok ? "Saved ✓" : "Save";
+    wBtn.classList.toggle("saved", ok);
+  }
+  function commitW(){
+    var v = num(wIn.value);
+    if(v == null) delete DB.weights[SEL];
+    else { DB.weights[SEL] = Math.round(v*10)/10; wIn.value = DB.weights[SEL]; }
+    save(); weightTile(); wState(); refreshDots();
+  }
+  wIn.addEventListener("input", wState);
+  wIn.addEventListener("change", commitW);
+  wBtn.addEventListener("click", function(){ commitW(); wIn.blur(); });
+  wState();
+  weightTile();
+  document.getElementById("wTile").addEventListener("click", function(){ showTab("weight"); });
+
+  host.querySelectorAll("[data-sq]").forEach(function(el){
+    function go(){
+      var i = +el.getAttribute("data-sq");
+      var cur = (DB.daily[SEL] || {}).squats || 0;
+      var next = (cur === i+1) ? i : i+1;
+      (DB.daily[SEL] || (DB.daily[SEL] = {})).squats = next;
+      save(); renderDaily(); refreshDots();
+    }
+    el.addEventListener("click", go);
+    el.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } });
+  });
+
+  host.querySelectorAll("[data-tick]").forEach(function(el){
+    function go(){
+      var k = el.getAttribute("data-tick");
+      var o = DB.daily[SEL] || (DB.daily[SEL] = {});
+      o[k] = !o[k];
+      save();
+      el.classList.toggle("on", o[k]);
+      el.setAttribute("aria-checked", String(o[k]));
+      refreshDots();
+    }
+    el.addEventListener("click", go);
+    el.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } });
+  });
+}
+
+/* ================= weight math ================= */
+function wDates(){ return Object.keys(DB.weights).filter(function(d){ return DB.weights[d] != null; }).sort(); }
+function avgAt(date){
+  var sum = 0, n = 0;
+  for(var i=0;i<7;i++){ var v = DB.weights[shift(date,-i)]; if(v != null){ sum += v; n++; } }
+  return n ? sum/n : null;
+}
+function signed(n, dp){ dp = dp == null ? 1 : dp; return (n >= 0 ? "+" : "\u2212") + Math.abs(n).toFixed(dp); }
+
+/* the button under the weight box: a quick read plus a 30-day sparkline; opens the Weight tab */
+function weightTile(){
+  var el = document.getElementById("wTile");
+  if(!el) return;
+  var ds = wDates(), l1, l2 = "";
+  if(!ds.length) l1 = "No weigh-ins yet.";
+  else{
+    var a = avgAt(SEL), p = avgAt(shift(SEL,-7));
+    if(a == null){
+      var last = ds[ds.length-1];
+      l1 = "Last reading " + DB.weights[last].toFixed(1) + " lb";
+      l2 = '<span>' + shortDate(last) + '</span>';
+    }else{
+      l1 = "7-day average " + a.toFixed(1) + " lb";
+      if(p != null){
+        var dl = a - p;
+        l2 = '<span class="wd '+(dl < -0.05 ? "down" : (dl > 0.05 ? "up" : ""))+'">' + signed(dl) + ' lb this week</span>';
+      }
+    }
+  }
+  el.innerHTML = '<span class="wtxt"><b>Weight trend</b><span>'+l1+'</span>'+l2+'</span>'+spark(SEL)+
+    '<span class="chev" aria-hidden="true">\u203a</span>';
+}
+function spark(end){
+  var pts = [];
+  for(var i=29;i>=0;i--){ var a = avgAt(shift(end,-i)); if(a != null) pts.push([29-i, a]); }
+  if(pts.length < 2) return "";
+  var vs = pts.map(function(p){ return p[1]; });
+  var lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs);
+  if(hi - lo < 1){ var m = (hi+lo)/2; lo = m-0.5; hi = m+0.5; }
+  function X(k){ return 3 + k/29*78; }
+  function Y(v){ return 4 + (hi-v)/(hi-lo)*22; }
+  var lp = pts[pts.length-1];
+  return '<svg class="spark" viewBox="0 0 84 30" aria-hidden="true"><path d="'+
+    pts.map(function(p,k){ return (k?"L":"M")+X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1); }).join(" ")+
+    '" fill="none" stroke="#89b4ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'+
+    '<circle cx="'+X(lp[0]).toFixed(1)+'" cy="'+Y(lp[1]).toFixed(1)+'" r="2.6" fill="#f0c987"/></svg>';
+}
+
+/* ================= history ================= */
+function renderHistory(){
+  /* daily consistency */
+  var today = iso(new Date()), days = [];
+  for(var i=20;i>=0;i--) days.push(shift(today,-i));
+  var hh = '<div class="hcard"><h2>Daily</h2><p class="hsub">Last 21 days.</p>';
+
+  var sqDays = days.filter(function(d){ return hasSquats(dayIndex(d)); });
+  var sqFull = sqDays.filter(function(d){ return ((DB.daily[d]||{}).squats||0) >= SQUAT_CHUNKS; }).length;
+  hh += '<div class="striplbl"><span>Squats</span><em>'+sqFull+' of '+sqDays.length+' full</em></div><div class="strip">';
+  days.forEach(function(d){
+    var n = (DB.daily[d]||{}).squats || 0;
+    var c = !hasSquats(dayIndex(d)) ? "" : (n >= SQUAT_CHUNKS ? "y" : (n > 0 ? "p" : ""));
+    hh += '<i class="'+c+'"></i>';
+  });
+  hh += '</div>';
+
+  TICKS.forEach(function(t){
+    var sched = days.filter(function(d){ return t.days.indexOf(dayIndex(d)) >= 0; });
+    var hit = sched.filter(function(d){ return (DB.daily[d]||{})[t.id]; }).length;
+    hh += '<div class="striplbl"><span>'+t.n+'</span><em>'+hit+' of '+sched.length+'</em></div><div class="strip">';
+    days.forEach(function(d){
+      var on = t.days.indexOf(dayIndex(d)) >= 0;
+      hh += '<i class="'+(on && (DB.daily[d]||{})[t.id] ? "y" : "")+'"></i>';
+    });
+    hh += '</div>';
+  });
+  hh += '</div>';
+  document.getElementById("histHabits").innerHTML = hh;
+
+  /* lifts; the KB complex is charted as bell weight x rounds */
+  var lh = "", any = false;
+  allLifts().forEach(function(b){
+    var cx = complexId(b.id);
+    var series = Object.keys(DB.sessions).filter(function(d){ return filled(setsOf(d,b.id)).length; }).sort()
+      .map(function(d){ var s = filled(setsOf(d,b.id)); return {d:d, e: cx ? s[0].w * s[0].r : bestE1(s)}; });
+    if(!series.length) return;
+    any = true;
+    var last = series[series.length-1].e, first = series[0].e, chg = last - first;
+    var top = cx ? filled(setsOf(series[series.length-1].d, b.id))[0] : null;
+    lh += '<div class="hcard"><div class="hrow2"><h2>'+b.n+'</h2><span class="meta">'+
+      (series.length > 1 ? signed(chg,0)+(cx ? ' lb \u00d7 rounds' : ' lb est. 1RM') : 'first session')+'</span></div>'+
+      '<p class="hsub">'+(cx ? 'Latest '+top.w+' lb \u00d7 '+top.r+' rounds' : 'Est. 1RM now '+Math.round(last)+' lb')+
+      ' \u00b7 '+series.length+' session'+(series.length>1?'s':'')+'</p>'+
+      barChart(series, cx ? "Bell weight times rounds by session" : "Estimated one-rep max by session")+'</div>';
+  });
+  document.getElementById("histLifts").innerHTML = any ? lh :
+    '<div class="hcard"><h2>Lifts</h2><p class="empty">Log a session and your strength trend appears here.</p></div>';
+}
+
+/* ================= weight tab ================= */
+/* Apple Health style: pick W / M / 6M / Y, read the average, tap or drag to read any point. */
+var WR = "M";    /* chart range */
+var WC = null;   /* the chart on screen, kept for tap-to-read */
+
+function renderWeight(){
+  buildChart();
+  var ds = wDates();
+
+  var st = document.getElementById("wStats");
+  if(!ds.length) st.innerHTML = "";
+  else{
+    var end = ds[ds.length-1];
+    var a0 = avgAt(end), a7 = avgAt(shift(end,-7)), a28 = avgAt(shift(end,-28));
+    var rate = (a0 != null && a7 != null) ? a0-a7 : null;
+    var m30  = (a0 != null && a28 != null) ? a0-a28 : null;
+    var cls = function(n){ return n == null ? "none" : (n < -0.05 ? "gain" : (n > 0.05 ? "loss" : "")); };
+    st.innerHTML = '<div class="stats">'+
+      '<div class="stat"><div class="k">7-day average</div><div class="v'+(a0==null?" none":"")+'">'+(a0!=null?a0.toFixed(1):"Not yet")+'</div></div>'+
+      '<div class="stat"><div class="k">Weekly rate</div><div class="v '+cls(rate)+'">'+(rate!=null?signed(rate)+" lb":"Not yet")+'</div></div>'+
+      '<div class="stat"><div class="k">vs 4 weeks ago</div><div class="v '+cls(m30)+'">'+(m30!=null?signed(m30)+" lb":"Not yet")+'</div></div>'+
+      '<div class="stat"><div class="k">Latest reading</div><div class="v">'+DB.weights[end].toFixed(1)+'</div></div>'+
+      '</div>';
+  }
+
+  /* recent readings; tap one to open that day on the Log tab */
+  var wl = document.getElementById("wList");
+  if(!ds.length){ wl.innerHTML = '<p class="empty">Nothing logged yet.</p>'; return; }
+  wl.innerHTML = ds.slice(-14).reverse().map(function(d){
+    return '<button type="button" class="ritem" data-date="'+d+'"><span>'+shortDate(d)+'</span><b>'+
+      DB.weights[d].toFixed(1)+' lb<i>\u203a</i></b></button>';
+  }).join("");
+  wl.querySelectorAll("[data-date]").forEach(function(b){
+    b.addEventListener("click", function(){ showTab("log"); pick(b.getAttribute("data-date")); });
+  });
+}
+
+/* time buckets for a range: days for W and M, weeks for 6M, calendar months for Y */
+function wSlots(range, today){
+  var s = [], i, d;
+  if(range === "W" || range === "M"){
+    for(i=(range === "W" ? 6 : 29); i>=0; i--){ d = shift(today,-i); s.push({a:d, b:d}); }
+  }else if(range === "6M"){
+    var m0 = shift(mondayOf(today), -7*25);
+    for(i=0;i<26;i++){ d = shift(m0, 7*i); s.push({a:d, b:shift(d,6)}); }
+  }else{
+    var t = parse(today);
+    for(i=11;i>=0;i--) s.push({a:iso(new Date(t.getFullYear(), t.getMonth()-i, 1)), b:iso(new Date(t.getFullYear(), t.getMonth()-i+1, 0))});
+  }
+  return s;
+}
+function meanIn(a, b){
+  var sum = 0, n = 0;
+  for(var d in DB.weights){ var v = DB.weights[d]; if(v != null && d >= a && d <= b){ sum += v; n++; } }
+  return n ? {v:sum/n, n:n} : null;
+}
+function niceScale(lo, hi){
+  if(hi - lo < 2){ var m = (hi+lo)/2; lo = m-1; hi = m+1; }
+  var steps = [0.5,1,2,5,10,20,50], step = 50;
+  for(var i=0;i<steps.length;i++){ if((hi-lo)/steps[i] <= 4){ step = steps[i]; break; } }
+  var a = Math.floor(lo/step)*step, b = Math.ceil(hi/step)*step, ticks = [];
+  for(var v=a; v<=b+1e-9; v+=step) ticks.push(Math.round(v*100)/100);
+  return {lo:a, hi:b, step:step, ticks:ticks};
+}
+function xLabel(slots, i){
+  var d = parse(slots[i].a), n = slots.length;
+  if(WR === "W") return d.toLocaleDateString(undefined,{weekday:"narrow"});
+  if(WR === "M") return (n-1-i) % 7 === 0 ? fmtMD(d) : null;
+  if(WR === "6M") return (i > 0 && d.getMonth() !== parse(slots[i-1].a).getMonth()) ? d.toLocaleDateString(undefined,{month:"short"}) : null;
+  return d.toLocaleDateString(undefined,{month:"narrow"});
+}
+
+function buildChart(){
+  document.querySelectorAll("#wRange button").forEach(function(b){
+    var on = b.getAttribute("data-r") === WR;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", String(on));
+  });
+  var today = iso(new Date());
+  var slots = wSlots(WR, today), byDay = (WR === "W" || WR === "M");
+  var pts = [], avg = [];
+  slots.forEach(function(s, i){
+    var m = meanIn(s.a, s.b);
+    if(m) pts.push({i:i, v:m.v, n:m.n, a:s.a});
+    if(byDay){ var a7 = avgAt(s.a); if(a7 != null) avg.push({i:i, v:a7}); }
+  });
+  var all = meanIn(slots[0].a, today);
+  var ends = avg.length > 1 ? avg : pts;
+  WC = {W:340, pts:pts, sel:null,
+        avg: all ? all.v : null,
+        chg: ends.length > 1 ? ends[ends.length-1].v - ends[0].v : null,
+        span: byDay ? rangeText(slots[0].a, today, true) : monthRange(slots[0].a, today)};
+
+  document.getElementById("wChartBox").innerHTML = pts.length ? chartSvg(slots, pts, avg) :
+    '<p class="empty">'+(wDates().length ? "No weigh-ins in this range." : "Log your weight on the Log tab and it shows up here.")+'</p>';
+
+  document.getElementById("wcLeg").innerHTML = !pts.length ? "" : byDay
+    ? '<span><i class="ld"></i>Daily weigh-in</span>'+(avg.length > 1 ? '<span><i class="ll"></i>7-day average</span>' : '')
+    : '<span><i class="ld"></i>'+(WR === "6M" ? "Weekly average" : "Monthly average")+'</span>';
+
+  var ch = document.getElementById("wcChg");
+  if(WC.chg == null) ch.innerHTML = "";
+  else ch.innerHTML = '<div class="wlbl">Change</div><div class="wchg '+
+    (WC.chg < -0.05 ? "down" : (WC.chg > 0.05 ? "up" : "flat"))+'">'+signed(WC.chg)+' lb</div>';
+  wcHeader();
+}
+
+function chartSvg(slots, pts, avg){
+  var W = 340, H = 196, PL = 6, PR = 40, PT = 12, PB = 26;
+  var pw = W-PL-PR, ph = H-PT-PB, sw = pw/slots.length;
+  var vals = pts.map(function(p){ return p.v; }).concat(avg.map(function(p){ return p.v; }));
+  var sc = niceScale(Math.min.apply(null, vals), Math.max.apply(null, vals));
+  function X(i){ return PL + (i+0.5)*sw; }
+  function Y(v){ return PT + (sc.hi-v)/(sc.hi-sc.lo)*ph; }
+
+  var g = "";
+  sc.ticks.forEach(function(v){
+    var y = Y(v);
+    g += '<line x1="'+PL+'" y1="'+y.toFixed(1)+'" x2="'+(W-PR)+'" y2="'+y.toFixed(1)+'" stroke="#1e3252" stroke-width="1"/>'+
+         '<text x="'+(W-PR+7)+'" y="'+(y+3.5).toFixed(1)+'" fill="#5d7ba6" font-size="10">'+(sc.step < 1 ? v.toFixed(1) : v.toFixed(0))+'</text>';
+  });
+  slots.forEach(function(s, i){
+    var t = xLabel(slots, i);
+    if(t == null) return;
+    var x = X(i).toFixed(1);
+    g += '<line x1="'+x+'" y1="'+PT+'" x2="'+x+'" y2="'+(PT+ph)+'" stroke="#1e3252" stroke-width="1" stroke-dasharray="2 3"/>'+
+         '<text x="'+x+'" y="'+(H-8)+'" fill="#5d7ba6" font-size="10" text-anchor="middle">'+t+'</text>';
+  });
+
+  pts.forEach(function(p){ p.x = X(p.i); p.y = Y(p.v); });
+  var r = WR === "M" ? 3.2 : (WR === "6M" ? 3.6 : 4.5);
+  var line = "";
+  if(avg.length > 1){
+    line = '<path d="'+avg.map(function(p,k){ return (k?"L":"M")+X(p.i).toFixed(1)+" "+Y(p.v).toFixed(1); }).join(" ")+
+      '" fill="none" stroke="#f0c987" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  }else if(!avg.length && pts.length > 1){
+    line = '<path d="'+pts.map(function(p,k){ return (k?"L":"M")+p.x.toFixed(1)+" "+p.y.toFixed(1); }).join(" ")+
+      '" fill="none" stroke="#89b4ee" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  var dots = pts.map(function(p){ return '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+r+'" fill="#89b4ee"/>'; }).join("");
+  var sel = '<g id="wcSel" visibility="hidden"><line x1="0" y1="'+PT+'" x2="0" y2="'+(PT+ph)+'" stroke="#cfe0f7" stroke-opacity=".6" stroke-width="1"/>'+
+    '<circle cx="0" cy="0" r="'+(r+1.8)+'" fill="#f0c987" stroke="#152744" stroke-width="2"/></g>';
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Weight chart">'+g+line+dots+sel+'</svg>';
+}
+
+/* header shows the range average, or the point she tapped */
+function wcHeader(){
+  var lbl = document.getElementById("wcLbl"), val = document.getElementById("wcVal"), sub = document.getElementById("wcSub");
+  var p = (WC && WC.sel != null) ? WC.pts[WC.sel] : null;
+  if(p){
+    var cnt = " \u00b7 " + p.n + (p.n === 1 ? " reading" : " readings");
+    lbl.textContent = WR === "6M" ? "Week average" : (WR === "Y" ? "Month average" : "Weigh-in");
+    val.textContent = p.v.toFixed(1);
+    sub.textContent = WR === "6M" ? "Week of " + fmtMD(parse(p.a)) + cnt
+      : WR === "Y" ? parse(p.a).toLocaleDateString(undefined,{month:"long", year:"numeric"}) + cnt
+      : longDate(p.a);
+  }else{
+    lbl.textContent = "Average";
+    val.textContent = (WC && WC.avg != null) ? WC.avg.toFixed(1) : "--";
+    sub.textContent = WC ? WC.span : "";
+  }
+}
+function wcSelect(i){
+  if(!WC) return;
+  WC.sel = (i == null || !WC.pts[i]) ? null : i;
+  var g = document.getElementById("wcSel");
+  if(g){
+    if(WC.sel == null) g.setAttribute("visibility","hidden");
+    else{
+      var p = WC.pts[WC.sel], ln = g.querySelector("line"), c = g.querySelector("circle");
+      ln.setAttribute("x1", p.x.toFixed(1)); ln.setAttribute("x2", p.x.toFixed(1));
+      c.setAttribute("cx", p.x.toFixed(1)); c.setAttribute("cy", p.y.toFixed(1));
+      g.setAttribute("visibility","visible");
+    }
+  }
+  wcHeader();
+}
+
+function barChart(series, label){
+  var s = series.slice(-16), W = 320, H = 84;
+  var vals = s.map(function(x){ return x.e; });
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  if(hi === lo){ lo = hi*0.9; hi = hi*1.05; } else { lo -= (hi-lo)*0.6; }
+  var bw = Math.min(W/s.length, 30), ox = (W - bw*s.length)/2;
+  var bars = s.map(function(x,i){
+    var h = Math.max(3, (x.e-lo)/(hi-lo)*(H-2));
+    return '<rect x="'+(ox+i*bw+bw*0.18).toFixed(1)+'" y="'+(H-h-2).toFixed(1)+'" width="'+(bw*0.64).toFixed(1)+
+           '" height="'+h.toFixed(1)+'" rx="2" fill="'+(i === s.length-1 ? "#e8cfa0" : "#27406b")+'"/>';
+  }).join("");
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+(label || "Estimated one-rep max by session")+'">'+bars+'</svg>';
+}
+
+/* ================= backup ================= */
+function sinceBackup(){
+  if(!DB.lastBackup) return null;
+  return Math.floor((parse(iso(new Date())) - parse(DB.lastBackup)) / 86400000);
+}
+function hasData(){ return Object.keys(DB.sessions).length || Object.keys(DB.weights).length || Object.keys(DB.daily).length; }
+function renderWarn(){
+  var el = document.getElementById("warnTop");
+  if(!hasData()){ el.innerHTML = ""; return; }
+  var n = sinceBackup();
+  if(n === null){ el.innerHTML = '<div class="warn">Never backed up. This log lives only on this phone — open Backup and export it.</div>'; return; }
+  if(n >= 10){ el.innerHTML = '<div class="warn bad">Last backup was '+n+' days ago. Export it before you lose it.</div>'; return; }
+  if(n >= 7){ el.innerHTML = '<div class="warn">Last backup was '+n+' days ago. Good time to export.</div>'; return; }
+  el.innerHTML = "";
+}
+function markBackup(){ DB.lastBackup = iso(new Date()); save(); renderWarn(); renderBackup(); }
+function renderBackup(){
+  var n = sinceBackup();
+  document.getElementById("bWhen").textContent = DB.lastBackup
+    ? "Last backup " + shortDate(DB.lastBackup) + (n === 0 ? " (today)" : " \u2014 " + n + " days ago")
+    : "No backup taken yet.";
+}
+
+document.getElementById("bCopy").addEventListener("click", function(){
+  var txt = JSON.stringify(DB);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){
+      markBackup(); alert("Backup copied. Paste it somewhere safe — Notes, or email it to yourself.");
+    }).catch(function(){ fallback(txt); });
+  } else fallback(txt);
+  function fallback(t){
+    var box = document.getElementById("bBox");
+    box.value = t; box.focus(); box.select(); markBackup();
+    alert("Copy was blocked. The backup is in the box below — select all and copy it manually.");
+  }
+});
+document.getElementById("bDown").addEventListener("click", function(){
+  var blob = new Blob([JSON.stringify(DB,null,2)], {type:"application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "workout-" + iso(new Date()) + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  markBackup();
+});
+document.getElementById("bRestore").addEventListener("click", function(){
+  var raw = document.getElementById("bBox").value.trim();
+  if(!raw) return alert("Paste a backup first.");
+  var p; try{ p = JSON.parse(raw); }catch(e){ return alert("That doesn't look like a backup."); }
+  if(!confirm("Replace everything currently logged with this backup?")) return;
+  DB = merge(blank(), p); save(); boot(); alert("Restored.");
+});
+document.getElementById("bSum").addEventListener("click", function(){
+  var L = ["WORKOUT LOG \u2014 " + shortDate(iso(new Date()))];
+  var ds = wDates();
+  if(ds.length){
+    var end = ds[ds.length-1], a0 = avgAt(end), a7 = avgAt(shift(end,-7));
+    L.push("Weight: " + DB.weights[end].toFixed(1) + " lb  |  7-day avg " + (a0 ? a0.toFixed(1) : "\u2014") +
+      (a0 && a7 ? "  |  " + signed(a0-a7) + " lb/wk" : ""));
+  }
+  L.push("");
+  allLifts().forEach(function(b){
+    var dts = Object.keys(DB.sessions).filter(function(d){ return filled(setsOf(d,b.id)).length; }).sort();
+    if(!dts.length) return;
+    var d = dts[dts.length-1], s = filled(setsOf(d,b.id));
+    L.push(complexId(b.id)
+      ? b.n + " (" + d + "): " + s[0].w + " lb \u00d7 " + s[0].r + " rounds"
+      : b.n + " (" + d + "): " + s.map(function(x){ return x.w+"\u00d7"+x.r; }).join(", ") + "   est1RM " + Math.round(bestE1(s)));
+  });
+  L.push("");
+  var today = iso(new Date()), days = [];
+  for(var i=20;i>=0;i--) days.push(shift(today,-i));
+  L.push("Squats full days: " + days.filter(function(d){ return ((DB.daily[d]||{}).squats||0) >= SQUAT_CHUNKS; }).length + " of last 21");
+  TICKS.forEach(function(t){
+    L.push(t.n + ": " + days.filter(function(d){ return (DB.daily[d]||{})[t.id]; }).length + " of last 21");
+  });
+  document.getElementById("bSumBox").value = L.join("\n");
+});
+
+/* ================= nav ================= */
+function showTab(name){
+  document.querySelectorAll(".tabs button").forEach(function(x){ x.classList.toggle("on", x.dataset.tab === name); });
+  document.querySelectorAll("section").forEach(function(x){ x.classList.toggle("on", x.id === "tab-" + name); });
+  document.getElementById("dayNav").style.display = (name === "log") ? "" : "none";
+  if(name === "weight") renderWeight();
+  if(name === "history") renderHistory();
+  if(name === "backup") renderBackup();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll(".tabs button").forEach(function(b){
+  b.addEventListener("click", function(){ showTab(b.dataset.tab); });
+});
+
+/* week arrows move to the same weekday a week earlier or later */
+document.getElementById("wkPrev").addEventListener("click", function(){ pick(shift(SEL,-7)); });
+document.getElementById("wkNext").addEventListener("click", function(){ pick(shift(SEL,7)); });
+document.getElementById("wkToday").addEventListener("click", function(){ pick(iso(new Date())); });
+
+document.querySelectorAll("#wRange button").forEach(function(b){
+  b.addEventListener("click", function(){ WR = b.getAttribute("data-r"); buildChart(); });
+});
+
+/* tap or drag on the weight chart to read a point; tap the same point again to clear */
+(function(){
+  var box = document.getElementById("wChartBox"), drag = false, downAt = null;
+  function idxAt(e){
+    var svg = box.querySelector("svg");
+    if(!svg || !WC || !WC.pts.length) return null;
+    var r = svg.getBoundingClientRect();
+    if(!r.width) return null;
+    var x = (e.clientX - r.left) / r.width * WC.W, best = null, bd = Infinity;
+    WC.pts.forEach(function(p, i){ var dd = Math.abs(p.x - x); if(dd < bd){ bd = dd; best = i; } });
+    return best;
+  }
+  box.addEventListener("pointerdown", function(e){
+    var i = idxAt(e);
+    if(i == null) return;
+    drag = true; downAt = i;
+    wcSelect(i === WC.sel ? null : i);
+  });
+  box.addEventListener("pointermove", function(e){
+    if(!drag) return;
+    var i = idxAt(e);
+    if(i != null && i !== downAt && i !== WC.sel){ downAt = -1; wcSelect(i); }
+  });
+  ["pointerup","pointercancel","pointerleave"].forEach(function(t){ box.addEventListener(t, function(){ drag = false; }); });
+  box.addEventListener("keydown", function(e){
+    if(!WC || !WC.pts.length) return;
+    var n = WC.pts.length, s = WC.sel;
+    if(e.key === "ArrowLeft"){ e.preventDefault(); wcSelect(s == null ? n-1 : Math.max(0, s-1)); }
+    else if(e.key === "ArrowRight"){ e.preventDefault(); wcSelect(s == null ? n-1 : Math.min(n-1, s+1)); }
+    else if(e.key === "Escape") wcSelect(null);
+  });
+})();
+
+/* if the app sat open overnight, roll "today" forward when she comes back to it */
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState !== "visible") return;
+  var t = iso(new Date());
+  if(t === BOOTDAY) return;
+  var wasToday = (SEL === BOOTDAY);
+  BOOTDAY = t;
+  if(wasToday) pick(t); else renderDays();
+});
+
+/* ================= boot ================= */
+var BOOTDAY = null;
+function boot(){
+  SEL = BOOTDAY = iso(new Date());
+  VIEWDAY = dayIndex(SEL);
+  WEEK0 = mondayOf(SEL);
+  renderDays(); renderLog(); renderBackup();
+}
+load();
+boot();
+</script>
+</body>
+</html>
