@@ -104,8 +104,64 @@
     font-size:14.5px;font-weight:600;color:#fff;
   }
   .recipe{margin:8px 0 0;font-size:14.5px;line-height:1.45;color:#dbe7f7}
-  .cxheads{display:grid;grid-template-columns:16px 1fr 14px 1fr;gap:8px;margin-top:13px;font-size:12px;color:var(--dim);text-align:center}
-  .cxheads + .setrow{margin-top:4px}
+  /* KB complex: move tiles, round tiles and a silent rest timer */
+  .moves{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .move{background:var(--field);border:1px solid var(--line);border-radius:9px;padding:9px 12px 10px;min-width:0}
+  .move b{display:block;font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+  .move span{display:block;font-size:13px;color:var(--blue);margin-top:1px;font-variant-numeric:tabular-nums}
+  .cxctl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .cxfield{display:block;min-width:0}
+  .cxfield > span{display:block;color:var(--dim);font-size:12px;margin:0 0 5px 3px}
+  .cxfield input{
+    width:100%;height:54px;background:var(--field);border:1px solid var(--line);color:var(--blue);
+    border-radius:9px;padding:0 8px;font-size:19px;font-weight:600;font-family:inherit;
+    text-align:center;font-variant-numeric:tabular-nums;
+  }
+  .cxfield input::placeholder{color:#39537d;font-weight:400;font-size:17px}
+  .cxfield input:focus{outline:none;border-color:var(--blue2);background:var(--field2);color:#fff}
+  .cxfield input:not(:placeholder-shown){color:#fff;font-weight:700;border-color:#2b4a78}
+  .cxseg{display:grid;grid-template-columns:1fr 1fr;gap:3px;height:54px;padding:3px;background:var(--field);border:1px solid var(--line);border-radius:9px}
+  .cxseg button{border:none;background:none;border-radius:7px;padding:0;color:var(--blue);font:inherit;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;touch-action:manipulation;transition:background .15s,color .15s}
+  .cxseg button.on{background:var(--amber2);color:#1a2434}
+  .cxwarn{color:var(--amber);font-size:13px;margin:10px 0 0 3px}
+  .cxpanel{
+    position:relative;overflow:hidden;display:block;width:100%;margin-top:14px;padding:13px 14px 17px;
+    background:var(--field);border:1px solid var(--line);border-radius:12px;color:var(--ink);text-align:center;font:inherit;
+    touch-action:manipulation;transition:background .2s,border-color .2s;
+  }
+  .cxlbl{display:block;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+  .cxbig{display:flex;align-items:center;justify-content:center;height:66px;font-size:58px;font-weight:700;letter-spacing:-.045em;line-height:1}
+  .cxsub{display:block;font-size:13.5px;color:var(--blue);min-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cxbar{position:absolute;left:0;right:0;bottom:0;height:4px}
+  .cxbar i{display:block;height:100%;background:var(--blue);transform-origin:left center;transform:scaleX(0);transition:transform .25s linear}
+  .cxpanel:not([data-k=rest]) .cxbar i{transition:none}
+  .cxpanel,.cxtile,.cxseg button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .cxpanel[data-k=next] .cxbig,.cxpanel[data-k=done] .cxbig{font-size:36px;letter-spacing:-.03em}
+  .cxpanel[data-k=rest]{border-color:rgba(137,180,238,.45)}
+  .cxpanel.soon{border-color:rgba(240,201,135,.6)}
+  .cxpanel.soon .cxbig{color:var(--amber)}
+  .cxpanel.soon .cxbar i{background:var(--amber)}
+  .cxpanel[data-k=go]{background:rgba(127,199,155,.15);border-color:rgba(127,199,155,.6);animation:cxgo 1.4s ease-out 3}
+  .cxpanel[data-k=go] .cxlbl,.cxpanel[data-k=go] .cxbig{color:var(--green)}
+  .cxpanel[data-k=go] .cxsub{color:#b4e0c4}
+  .cxpanel[data-k=done] .cxbig{color:var(--green)}
+  @keyframes cxgo{0%{box-shadow:0 0 0 0 rgba(127,199,155,.45)}100%{box-shadow:0 0 0 14px rgba(127,199,155,0)}}
+  @media (prefers-reduced-motion:reduce){.cxpanel[data-k=go]{animation:none}}
+  .cxtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}
+  .cxtile{
+    position:relative;height:64px;padding:0;border-radius:10px;font:inherit;
+    background:var(--field);border:1px solid var(--line);color:var(--dim);
+    display:flex;align-items:center;justify-content:center;
+    touch-action:manipulation;transition:background .15s,border-color .15s,color .15s,transform .1s;
+  }
+  .cxtile b{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .cxtile small{position:absolute;left:0;right:0;bottom:7px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;visibility:hidden}
+  .cxtile:active{transform:scale(.96)}
+  .cxtile.next{border-color:var(--amber);color:#fff;background:rgba(240,201,135,.08);box-shadow:0 0 0 3px rgba(240,201,135,.12)}
+  .cxtile.next small{visibility:visible;color:var(--amber)}
+  .cxtile.done{background:rgba(127,199,155,.14);border-color:rgba(127,199,155,.45);color:var(--green)}
+  .cxtile.done::after{content:"";position:absolute;right:10px;top:8px;width:4px;height:8px;border:solid var(--green);border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .cxhint{font-size:13px;color:var(--dim);margin:9px 0 0}
   .sechead{margin:20px 0 0;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
 
   .block{padding:18px 0 4px}
@@ -352,7 +408,8 @@ var PROGRAM = {
   /* Tuesday's old leg lifts share ids with Friday's, so their history carries on there */
   2:{label:"Tue", part:"KB complex", lifts:[
     {id:"kb-complex", n:"KB complex", type:"complex", rounds:8,
-     recipe:"Per round: 8 swings · 8 goblet squats · 8 twists · 4 around the world each direction. One bell, never set down. Rest 45–60 s between rounds."}
+     moves:[["Swings","8 reps"],["Halos","4 each way"],["Twists","8 reps"],["Around the world","4 each way"]],
+     note:"Every round, in this order. One bell, never set down mid-round."}
   ]},
   3:{label:"Wed", part:"Shoulders / back", lifts:[
     {id:"shoulder-press",  n:"Shoulder press",  sets:4, lo:8,  hi:12},
@@ -617,19 +674,24 @@ function renderLog(){
   }
   if(showRoutine){
     if(!list.length) host.insertAdjacentHTML("beforeend", '<p class="restday">No lifting on this day. Abs and yoga are below.</p>');
-    list.forEach(function(b){ host.appendChild(b.type === "complex" ? complexEx(b) : liftEx(b)); });
+    list.forEach(function(b){ addEx(host, b); });
   }
   if(extras.length){
     host.insertAdjacentHTML("beforeend", '<p class="sechead">'+(showRoutine && list.length ? "Also logged this day" : "Logged this day")+'</p>');
     extras.forEach(function(id){
       var d = defOf(id) || {n:id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g," ")};
       var b = {id:id, n:d.n, sets:Math.max(d.sets || 0, (setsOf(SEL,id) || []).length),
-               type:d.type, rounds:d.rounds, recipe:d.recipe};
-      host.appendChild(b.type === "complex" ? complexEx(b) : liftEx(b));
+               type:d.type, rounds:d.rounds, moves:d.moves, note:d.note};
+      addEx(host, b);
     });
   }
 
   renderDaily();
+  cxStart();
+}
+function addEx(host, b){
+  if(b.type === "complex"){ host.appendChild(complexEx(b)); cxPaint(b); }
+  else host.appendChild(liftEx(b));
 }
 
 function liftEx(b){
@@ -684,37 +746,234 @@ function liftEx(b){
   return ex;
 }
 
-/* the KB complex: one bell, logged as bell weight x rounds finished */
+/* ================= KB complex: round tiles and a silent rest timer ================= */
+/* One entry per session: w = bell (lb), r = rounds done, rest = seconds, t = when each round was tapped.
+   Older entries only have w and r, so they show as finished rounds without times.
+   No sound or vibration anywhere, so music keeps playing. */
+var CX_IDLE = 15*60*1000;   /* after rest ends, how long the timer waits for a tap before standing down */
+var CX_SKIP = null;         /* {at: the tap whose rest was skipped, when: time of the skip} */
+var CX_MARKED = 0;          /* time of the last round tap, so a double tap doesn't undo it */
+var CX_TIMER = null;
+
+function cxBlock(){
+  for(var d in PROGRAM){
+    var ls = PROGRAM[d].lifts || [];
+    for(var i=0;i<ls.length;i++) if(ls[i].type === "complex") return ls[i];
+  }
+  return null;
+}
+/* rest carries over from the last finished session; 60 s to start */
+function cxLastRest(date, b){
+  var p = prevOf(date, b.id);
+  return (p && p.sets[0].rest === 45) ? 45 : 60;
+}
+function cxRead(date, b){
+  var e = (setsOf(date, b.id) || [])[0] || {};
+  var t;
+  if(Array.isArray(e.t)) t = e.t.slice(0, b.rounds);
+  else{
+    t = [];
+    var n = Math.min(b.rounds, Math.max(0, Math.round(Number(e.r) || 0)));
+    for(var i=0;i<n;i++) t.push(null);
+  }
+  return {w: e.w != null ? e.w : null, rest: (e.rest === 45 || e.rest === 60) ? e.rest : cxLastRest(date, b), t: t};
+}
+function cxWrite(date, b, c){
+  var s = DB.sessions[date] || (DB.sessions[date] = {lifts:{}});
+  if(!s.lifts) s.lifts = {};
+  if(c.w == null && !c.t.length && c.rest === cxLastRest(date, b)) delete s.lifts[b.id];
+  else s.lifts[b.id] = [{w: c.w, r: c.t.length || null, rest: c.rest, t: c.t}];
+  save();
+  var n = sessionCount();
+  document.getElementById("sessCount").textContent = n + (n === 1 ? " session logged" : " sessions logged");
+  refreshDots();
+}
+/* where the session stands: next (or ready), rest (counting down), go (rest is over), done */
+function cxPhase(c, b, now){
+  var n = c.t.length;
+  if(n >= b.rounds) return {k:"done", n:n};
+  var last = n ? c.t[n-1] : null;
+  if(last == null) return {k:"next", n:n};
+  var total = c.rest * 1000;
+  var end = (CX_SKIP && CX_SKIP.at === last) ? Math.min(CX_SKIP.when, last + total) : last + total;
+  if(now < end) return {k:"rest", n:n, left:end - now, total:total};
+  if(now - end < CX_IDLE) return {k:"go", n:n, since:now - end};
+  return {k:"next", n:n};
+}
+function clock(sec){ sec = Math.max(0, sec); return Math.floor(sec/60) + ":" + String(sec % 60).padStart(2,"0"); }
+
 function complexEx(b){
   var ex = document.createElement("div");
   ex.className = "ex";
+  ex.id = "cxCard";
   var prev = prevOf(SEL, b.id);
   var p0 = prev ? prev.sets[0] : null;
-  var c = (setsOf(SEL, b.id) || [])[0] || {};
-
+  var cue = "";
+  if(p0 && p0.r >= b.rounds){
+    cue = '<p class="note">' + (p0.rest === 45
+      ? "All " + b.rounds + " rounds at 45 s rest. If that felt solid, try the next bell up at 60 s rest."
+      : "All " + b.rounds + " rounds last time. If they felt solid, switch to 45 s rest.") + '</p>';
+  }
+  var lastLine = p0
+    ? 'Last on ' + medDate(prev.date) + ': <b>' + p0.w + ' lb × ' + p0.r + ' rounds</b>' + (p0.rest ? ' · ' + p0.rest + ' s rest' : '')
+    : 'No previous session logged.';
+  var tiles = "";
+  for(var i=0;i<b.rounds;i++){
+    tiles += '<button type="button" class="cxtile" data-i="' + i + '"><b class="num">' + (i+1) + '</b><small>Next</small></button>';
+  }
+  var moves = (b.moves || []).map(function(m){ return '<div class="move"><b>' + m[0] + '</b><span>' + m[1] + '</span></div>'; }).join("");
   ex.innerHTML =
-    '<div class="exhead"><h2>'+b.n+'</h2><span class="presc">'+b.rounds+' rounds</span></div>'+
-    (b.recipe ? '<p class="recipe">'+b.recipe+'</p>' : '')+
-    '<p class="lastline">'+(p0
-      ? 'Last on '+medDate(prev.date)+': <b>'+p0.w+' lb \u00d7 '+p0.r+' rounds</b>'+
-        '<button class="uselast" type="button">use last</button>'
-      : 'No previous session logged.')+'</p>'+
-    '<div class="cxheads"><span></span><span>Bell (lb)</span><span></span><span>Rounds</span></div>'+
-    '<div class="setrow"><div class="setno"></div>'+
-      '<input type="number" inputmode="decimal" step="0.5" aria-label="Bell weight in pounds" placeholder="'+(p0 ? p0.w : "lb")+'" value="'+(c.w != null ? c.w : "")+'">'+
-      '<div class="times">\u00d7</div>'+
-      '<input type="number" inputmode="numeric" step="1" aria-label="Rounds finished" placeholder="'+(p0 ? p0.r : b.rounds)+'" value="'+(c.r != null ? c.r : "")+'">'+
-    '</div>'+
-    (p0 && p0.r >= b.rounds ? '<p class="note">All '+b.rounds+' rounds last time. Try the next bell up.</p>' : '');
+    '<div class="exhead"><h2>' + b.n + '</h2><span class="presc" id="cxCount"></span></div>' +
+    (moves ? '<div class="moves">' + moves + '</div>' : '') +
+    (b.note ? '<p class="recipe">' + b.note + '</p>' : '') +
+    '<p class="lastline">' + lastLine + '</p>' +
+    cue +
+    '<div class="cxctl">' +
+      '<label class="cxfield"><span>Bell (lb)</span>' +
+        '<input type="number" inputmode="decimal" step="0.5" id="cxW" placeholder="' + (p0 ? p0.w : "lb") + '"></label>' +
+      '<div class="cxfield"><span id="cxRestLbl">Rest</span>' +
+        '<div class="cxseg" role="group" aria-labelledby="cxRestLbl">' +
+          '<button type="button" data-rest="60">60 s</button><button type="button" data-rest="45">45 s</button>' +
+        '</div></div>' +
+    '</div>' +
+    '<p class="cxwarn" id="cxWarn" hidden>Add the bell weight so this session shows in History.</p>' +
+    '<button type="button" class="cxpanel" id="cxPanel">' +
+      '<span class="cxlbl"></span><span class="cxbig num"></span><span class="cxsub"></span><span class="cxbar"><i></i></span>' +
+    '</button>' +
+    '<div class="cxtiles">' + tiles + '</div>' +
+    '<p class="cxhint">Tap a round as you finish it. Tap the last green one to undo.</p>';
 
-  var ii = ex.querySelectorAll("input");
-  function commit(){ putSet(b.id, 0, ii[0].value, ii[1].value); }
-  ii[0].addEventListener("change", commit);
-  ii[1].addEventListener("change", commit);
-  var ul = ex.querySelector(".uselast");
-  if(ul) ul.addEventListener("click", function(){ ii[0].value = p0.w; ii[1].value = p0.r; commit(); });
+  var wi = ex.querySelector("#cxW");
+  wi.addEventListener("change", function(){
+    var c = cxRead(SEL, b), v = parseFloat(wi.value);
+    c.w = isNaN(v) ? null : Math.round(v*10)/10;
+    cxWrite(SEL, b, c); cxPaint(b);
+  });
+  ex.querySelectorAll("[data-rest]").forEach(function(x){ x.addEventListener("click", function(){
+    var c = cxRead(SEL, b);
+    c.rest = +x.dataset.rest;
+    cxWrite(SEL, b, c); cxPaint(b);
+    if(SEL === iso(new Date())) cxStart();
+  }); });
+  ex.querySelectorAll(".cxtile").forEach(function(x){ x.addEventListener("click", function(){ cxTap(b, +x.dataset.i); }); });
+  ex.querySelector("#cxPanel").addEventListener("click", function(){ cxSkip(b); });
   return ex;
 }
+
+/* tap the next round when it's finished (a later tile fills in any missed ones); tap the last green one to undo */
+function cxTap(b, i){
+  var today = iso(new Date());
+  var c = cxRead(SEL, b), n = c.t.length;
+  if(i === n - 1){
+    if(Date.now() - CX_MARKED < 2000) return;     /* a double tap, not an undo */
+    c.t.pop();
+  }else if(i >= n){
+    var at = SEL === today ? Date.now() : null;    /* times only for a session happening now */
+    while(c.t.length <= i) c.t.push(at);
+    if(c.w == null){ var p = prevOf(SEL, b.id); if(p) c.w = p.sets[0].w; }
+    CX_MARKED = Date.now();
+    CX_SKIP = null;
+  }else return;
+  cxWrite(SEL, b, c);
+  cxPaint(b);
+  if(SEL === today) cxStart();
+}
+/* tap the countdown to end the rest early */
+function cxSkip(b){
+  var today = iso(new Date());
+  if(SEL !== today) return;
+  var c = cxRead(today, b);
+  if(cxPhase(c, b, Date.now()).k !== "rest") return;
+  CX_SKIP = {at: c.t[c.t.length - 1], when: Date.now()};
+  cxTick();
+}
+
+function cxPaint(b){
+  var card = document.getElementById("cxCard");
+  if(!card) return;
+  var c = cxRead(SEL, b), n = c.t.length;
+  document.getElementById("cxCount").textContent = n + " / " + b.rounds + " rounds";
+  card.querySelectorAll(".cxtile").forEach(function(el, i){
+    el.classList.toggle("done", i < n);
+    el.classList.toggle("next", i === n);
+    el.setAttribute("aria-label", "Round " + (i+1) +
+      (i < n ? (i === n-1 ? ", done. Tap to undo" : ", done") : (i === n ? ", tap when finished" : "")));
+  });
+  card.querySelectorAll("[data-rest]").forEach(function(x){
+    var on = +x.dataset.rest === c.rest;
+    x.classList.toggle("on", on);
+    x.setAttribute("aria-pressed", String(on));
+  });
+  var wi = document.getElementById("cxW");
+  if(document.activeElement !== wi) wi.value = c.w != null ? c.w : "";
+  document.getElementById("cxWarn").hidden = !(n && c.w == null);
+  cxPaintPanel(cxPhase(c, b, Date.now()), c, b);
+}
+
+/* the big panel: countdown while resting, Go when rest is over. Visual only. */
+function cxPaintPanel(ph, c, b){
+  var p = document.getElementById("cxPanel");
+  if(!p) return;
+  var lbl, big, sub, frac = 0;
+  if(ph.k === "rest"){
+    lbl = "Rest"; big = clock(Math.ceil(ph.left/1000));
+    sub = "Round " + (ph.n+1) + " next · tap to skip";
+    frac = Math.max(0, Math.min(1, ph.left/ph.total));
+  }else if(ph.k === "go"){
+    lbl = "Rest over"; big = "Go";
+    sub = "Round " + (ph.n+1) + (ph.since >= 10000 ? " · rest ended " + clock(Math.floor(ph.since/1000)) + " ago" : "");
+  }else if(ph.k === "done"){
+    lbl = b.n; big = "Done";
+    sub = ph.n + " rounds" + (c.w != null ? " · " + c.w + " lb" : "") + " · " + c.rest + " s rest";
+  }else{
+    lbl = ph.n ? "Up next" : "Ready"; big = "Round " + (ph.n+1);
+    sub = ph.n ? ph.n + " of " + b.rounds + " done" : "Each tap below starts a " + c.rest + " s rest.";
+  }
+  p.dataset.k = ph.k;
+  p.classList.toggle("soon", ph.k === "rest" && ph.left <= 10000);
+  p.querySelector(".cxlbl").textContent = lbl;
+  p.querySelector(".cxbig").textContent = big;
+  p.querySelector(".cxsub").textContent = sub;
+  p.querySelector(".cxbar i").style.transform = "scaleX(" + frac.toFixed(4) + ")";
+  p.setAttribute("aria-label", lbl + ": " + big + ". " + sub);
+}
+
+/* runs four times a second only while a rest or a Go is on screen, then stops itself */
+function cxTick(){
+  var b = cxBlock();
+  if(!b){ cxStop(); return; }
+  var now = Date.now(), today = iso(new Date(now));
+  var c = cxRead(today, b), ph = cxPhase(c, b, now);
+  var live = ph.k === "rest" || ph.k === "go";
+  if(live) wakeOn(false); else wakeOff();
+  if(SEL === today) cxPaintPanel(ph, c, b);
+  if(!live) cxStop();
+}
+function cxStart(){ if(!CX_TIMER) CX_TIMER = setInterval(cxTick, 250); cxTick(); }
+function cxStop(){ if(CX_TIMER){ clearInterval(CX_TIMER); CX_TIMER = null; } }
+
+/* keep the screen from locking while the complex is under way */
+var WL = null, WL_WANT = false, WL_BUSY = false, WL_FAIL = 0;
+function wakeOn(force){
+  WL_WANT = true;
+  if(WL || WL_BUSY || !("wakeLock" in navigator) || document.visibilityState !== "visible") return;
+  if(!force && Date.now() - WL_FAIL < 5000) return;
+  WL_BUSY = true;
+  try{
+    navigator.wakeLock.request("screen").then(function(s){
+      WL_BUSY = false;
+      if(!WL_WANT){ s.release().catch(function(){}); return; }
+      WL = s;
+      s.addEventListener("release", function(){ if(WL === s) WL = null; });
+    }, function(){ WL_BUSY = false; WL_FAIL = Date.now(); });
+  }catch(e){ WL_BUSY = false; WL_FAIL = Date.now(); }
+}
+function wakeOff(){
+  WL_WANT = false;
+  if(WL){ var s = WL; WL = null; s.release().catch(function(){}); }
+}
+/* a tap gets the screen lock back if iOS dropped it */
+document.addEventListener("pointerdown", function(){ if(WL_WANT && !WL) wakeOn(true); }, {passive:true});
 
 function putSet(id, i, w, r){
   var s = DB.sessions[SEL] || (DB.sessions[SEL] = {lifts:{}});
@@ -902,7 +1161,7 @@ function renderHistory(){
     var top = cx ? filled(setsOf(series[series.length-1].d, b.id))[0] : null;
     lh += '<div class="hcard"><div class="hrow2"><h2>'+b.n+'</h2><span class="meta">'+
       (series.length > 1 ? signed(chg,0)+(cx ? ' lb \u00d7 rounds' : ' lb est. 1RM') : 'first session')+'</span></div>'+
-      '<p class="hsub">'+(cx ? 'Latest '+top.w+' lb \u00d7 '+top.r+' rounds' : 'Est. 1RM now '+Math.round(last)+' lb')+
+      '<p class="hsub">'+(cx ? 'Latest '+top.w+' lb \u00d7 '+top.r+' rounds'+(top.rest ? ' \u00b7 '+top.rest+' s rest' : '') : 'Est. 1RM now '+Math.round(last)+' lb')+
       ' \u00b7 '+series.length+' session'+(series.length>1?'s':'')+'</p>'+
       barChart(series, cx ? "Bell weight times rounds by session" : "Estimated one-rep max by session")+'</div>';
   });
@@ -1168,7 +1427,7 @@ document.getElementById("bSum").addEventListener("click", function(){
     if(!dts.length) return;
     var d = dts[dts.length-1], s = filled(setsOf(d,b.id));
     L.push(complexId(b.id)
-      ? b.n + " (" + d + "): " + s[0].w + " lb \u00d7 " + s[0].r + " rounds"
+      ? b.n + " (" + d + "): " + s[0].w + " lb \u00d7 " + s[0].r + " rounds" + (s[0].rest ? ", " + s[0].rest + " s rest" : "")
       : b.n + " (" + d + "): " + s.map(function(x){ return x.w+"\u00d7"+x.r; }).join(", ") + "   est1RM " + Math.round(bestE1(s)));
   });
   L.push("");
@@ -1240,6 +1499,7 @@ document.querySelectorAll("#wRange button").forEach(function(b){
 /* if the app sat open overnight, roll "today" forward when she comes back to it */
 document.addEventListener("visibilitychange", function(){
   if(document.visibilityState !== "visible") return;
+  cxStart();
   var t = iso(new Date());
   if(t === BOOTDAY) return;
   var wasToday = (SEL === BOOTDAY);
